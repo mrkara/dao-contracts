@@ -6,8 +6,8 @@ use crate::voting::ballot::{Choice, VotingId};
 /// Event thrown after voting contract is created
 #[derive(Debug, PartialEq, Event)]
 pub struct VotingContractCreated {
+    pub creator: Address,
     pub voter_contract: Address,
-    pub variable_repo: Address,
     pub reputation_token: Address,
 }
 
@@ -36,6 +36,4 @@ pub struct VotingEnded {
     pub votes_count: U256,
     pub stake_in_favor: U256,
     pub stake_against: U256,
-    pub informal_voting_id: VotingId,
-    pub formal_voting_id: Option<VotingId>,
 }
