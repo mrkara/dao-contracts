@@ -14,7 +14,6 @@ use casper_dao_utils::{
 
 use casper_types::{runtime_args, RuntimeArgs, U256, U512};
 
-
 use self::voting::VotingSummary;
 use self::{
     events::{BallotCast, VotingContractCreated, VotingCreated},
@@ -24,6 +23,7 @@ use self::{
 use casper_dao_utils::VecMapping;
 
 use super::ballot::Choice;
+use super::voting_callback::{GovernanceVotingCallback, GovernanceVotingCallbackCaller};
 use super::VotingEnded;
 use super::{ballot::VotingId, Ballot};
 
@@ -135,7 +135,7 @@ impl GovernanceVoting {
 
         let voters_len = self.voters.len(voting.voting_id());
         let voting_result = voting.get_result(voters_len);
-        
+
         if voting.voting_configuration().redistribute_reputation {
             self.redistribute_reputation(&voting);
         }
@@ -152,10 +152,7 @@ impl GovernanceVoting {
 
         self.set_voting(voting);
 
-        let voting_summary = VotingSummary::new(
-            voting_result,
-            voting_id,
-        );
+        let voting_summary = VotingSummary::new(voting_result, voting_id);
 
         self.callback(&voting, voting_summary);
 
@@ -163,17 +160,8 @@ impl GovernanceVoting {
     }
 
     fn callback(&self, voting: &Voting, voting_summary: VotingSummary) {
-        let callback_address = voting.voting_configuration().callback_address;
-        let callback_entrypoint = voting.voting_configuration().callback_entrypoint;
-
-        if callback_address.is_some() && callback_entrypoint.is_some() {
-            call_contract(
-                callback_address.unwrap_or_revert(),
-                callback_entrypoint.unwrap_or_revert().as_str(),
-                runtime_args! {
-                    "voting_summary" => voting_summary
-                },
-            )
+        if let Some(callback_address) = voting.voting_configuration().callback_address {
+            GovernanceVotingCallbackCaller::at(callback_address).on_voting_finished(voting_summary);
         }
     }
 

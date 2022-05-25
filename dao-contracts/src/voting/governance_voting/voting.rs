@@ -1,9 +1,10 @@
 //! Voting struct with logic for governance voting
 use crate::voting::ballot::{Choice, VotingId};
 use casper_dao_utils::{
-    casper_dao_macros::{CLTyped, FromBytes, ToBytes}, Address,
+    casper_dao_macros::{CLTyped, FromBytes, ToBytes},
+    Address,
 };
-use casper_types::{U256};
+use casper_types::U256;
 
 use super::consts;
 
@@ -41,14 +42,8 @@ pub struct VotingSummary {
 }
 
 impl VotingSummary {
-    pub fn new(
-        result: VotingResult,
-        voting_id: VotingId
-    ) -> Self {
-        Self {
-            result,
-            voting_id,
-        }
+    pub fn new(result: VotingResult, voting_id: VotingId) -> Self {
+        Self { result, voting_id }
     }
 
     fn is_rejected(&self) -> bool {
@@ -75,7 +70,6 @@ pub struct VotingConfiguration {
     pub redistribute_reputation: bool,
     pub mint_reputation: U256,
     pub callback_address: Option<Address>,
-    pub callback_entrypoint: Option<String>,
 }
 
 /// Voting struct
@@ -215,7 +209,6 @@ fn test_voting_serialization() {
             redistribute_reputation: true,
             mint_reputation: U256::from(1000),
             callback_address: None,
-            callback_entrypoint: None,
         },
     };
 

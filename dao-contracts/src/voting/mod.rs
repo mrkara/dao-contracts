@@ -2,6 +2,7 @@ mod ballot;
 mod governance_voting;
 pub mod kyc_info;
 pub mod onboarding_info;
+pub mod voting_callback;
 
 pub use ballot::Ballot;
 pub use ballot::Choice;

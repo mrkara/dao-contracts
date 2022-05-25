@@ -3,11 +3,15 @@ use casper_dao_utils::{
     casper_env::caller,
     Address,
 };
-use casper_types::{runtime_args, RuntimeArgs, U256};
+use casper_types::U256;
 
 use crate::{
     action::Action,
-    voting::{voting::Voting, Ballot, Choice, GovernanceVoting, VotingId},
+    voting::{
+        voting::{Voting, VotingSummary},
+        voting_callback::GovernanceVotingCallback,
+        Ballot, Choice, GovernanceVoting, VotingId,
+    },
 };
 
 use delegate::delegate;
@@ -38,8 +42,6 @@ pub trait AdminContractInterface {
     /// see [GovernanceVoting](GovernanceVoting)
     fn get_dust_amount(&self) -> U256;
     /// see [GovernanceVoting](GovernanceVoting)
-    fn get_variable_repo_address(&self) -> Address;
-    /// see [GovernanceVoting](GovernanceVoting)
     fn get_reputation_token_address(&self) -> Address;
     /// see [GovernanceVoting](GovernanceVoting)
     fn get_voting(&self, voting_id: U256) -> Option<Voting>;
@@ -59,6 +61,12 @@ pub struct AdminContract {
     voting: GovernanceVoting,
 }
 
+impl GovernanceVotingCallback for AdminContract {
+    fn on_voting_finished(&self, summary: VotingSummary) {
+        todo!()
+    }
+}
+
 impl AdminContractInterface for AdminContract {
     fn create_voting(
         &mut self,
@@ -67,15 +75,8 @@ impl AdminContractInterface for AdminContract {
         address: Address,
         stake: U256,
     ) {
-        self.voting.create_voting(
-            caller(),
-            stake,
-            contract_to_update,
-            action.get_entry_point(),
-            runtime_args! {
-                action.get_arg() => address,
-            },
-        );
+        self.voting
+            .create_voting(caller(), stake, Default::default());
     }
 
     fn vote(&mut self, voting_id: VotingId, choice: Choice, stake: U256) {
@@ -87,7 +88,6 @@ impl AdminContractInterface for AdminContract {
             fn init(&mut self, variable_repo: Address, reputation_token: Address);
             fn finish_voting(&mut self, voting_id: VotingId);
             fn get_dust_amount(&self) -> U256;
-            fn get_variable_repo_address(&self) -> Address;
             fn get_reputation_token_address(&self) -> Address;
             fn get_voting(&self, voting_id: U256) -> Option<Voting>;
             fn get_ballot(&self, voting_id: U256, address: Address) -> Option<Ballot>;
